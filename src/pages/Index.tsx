@@ -3,6 +3,7 @@ import ForumHeader from "@/components/ForumHeader";
 import ForumStats from "@/components/ForumStats";
 import ForumSection, { type Section } from "@/components/ForumSection";
 import TopicView from "@/components/TopicView";
+import AuthModal, { type ForumUser } from "@/components/AuthModal";
 import type { BannedUser } from "@/components/AdminPanel";
 
 const INITIAL_SECTIONS: Section[] = [
@@ -56,12 +57,22 @@ const INITIAL_SECTIONS: Section[] = [
   },
 ];
 
+const ADMIN_USER: ForumUser = {
+  id: 0,
+  username: "Admin",
+  role: "admin",
+  registeredAt: "01.01.2026",
+};
+
 const Index = () => {
   const [forumName, setForumName] = useState("Game Forum");
   const [isAdmin, setIsAdmin] = useState(false);
   const [sections, setSections] = useState<Section[]>(INITIAL_SECTIONS);
   const [selectedTopic, setSelectedTopic] = useState<{ sectionId: string; topicId: number } | null>(null);
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
+  const [currentUser, setCurrentUser] = useState<ForumUser | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [registeredUsers, setRegisteredUsers] = useState<ForumUser[]>([ADMIN_USER]);
 
   const handleBanUser = (name: string, reason: string) => {
     setBannedUsers((prev) => [
@@ -72,6 +83,22 @@ const Index = () => {
 
   const handleUnbanUser = (id: number) => {
     setBannedUsers((prev) => prev.filter((u) => u.id !== id));
+  };
+
+  const handleAuth = (user: ForumUser) => {
+    setCurrentUser(user);
+    if (user.role === "admin") {
+      setIsAdmin(true);
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setIsAdmin(false);
+  };
+
+  const handleRegister = (user: ForumUser) => {
+    setRegisteredUsers((prev) => [...prev, user]);
   };
 
   const updateTopic = (sectionId: string, topicId: number, updater: (t: Section["topics"][0]) => Section["topics"][0]) => {
@@ -120,6 +147,9 @@ const Index = () => {
         bannedUsers={bannedUsers}
         onBanUser={handleBanUser}
         onUnbanUser={handleUnbanUser}
+        currentUser={currentUser}
+        onOpenAuth={() => setAuthOpen(true)}
+        onLogout={handleLogout}
       />
 
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-4">
@@ -132,7 +162,12 @@ const Index = () => {
           />
         ) : (
           <>
-            <ForumStats totalTopics={totalTopics} totalPosts={totalPosts} totalUsers={0} onlineUsers={0} />
+            <ForumStats
+              totalTopics={totalTopics}
+              totalPosts={totalPosts}
+              totalUsers={registeredUsers.length}
+              onlineUsers={currentUser ? 1 : 0}
+            />
 
             {isAdmin && (
               <div className="bg-[hsl(var(--primary))]/10 border border-[hsl(var(--primary))]/30 rounded-lg px-4 py-3 text-sm text-[hsl(var(--primary))] flex items-center gap-2">
@@ -162,6 +197,14 @@ const Index = () => {
       <footer className="border-t border-border mt-8 py-4 text-center text-xs text-muted-foreground">
         {forumName} © 2026
       </footer>
+
+      <AuthModal
+        isOpen={authOpen}
+        onClose={() => setAuthOpen(false)}
+        onAuth={handleAuth}
+        registeredUsers={registeredUsers}
+        onRegister={handleRegister}
+      />
     </div>
   );
 };
