@@ -57,9 +57,9 @@ const INITIAL_SECTIONS: Section[] = [
   },
 ];
 
-const ADMIN_USER: ForumUser = {
+const CREATOR_USER: ForumUser = {
   id: 0,
-  username: "Admin",
+  username: "Pavel_Mativ",
   role: "admin",
   registeredAt: "01.01.2026",
 };
@@ -72,7 +72,7 @@ const Index = () => {
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [currentUser, setCurrentUser] = useState<ForumUser | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
-  const [registeredUsers, setRegisteredUsers] = useState<ForumUser[]>([ADMIN_USER]);
+  const [registeredUsers, setRegisteredUsers] = useState<ForumUser[]>([CREATOR_USER]);
 
   const handleBanUser = (name: string, reason: string) => {
     setBannedUsers((prev) => [
