@@ -2,17 +2,23 @@ import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import AdminPanel, { type BannedUser } from "@/components/AdminPanel";
 
 interface ForumHeaderProps {
   forumName: string;
   onNameChange: (name: string) => void;
   isAdmin: boolean;
   onToggleAdmin: () => void;
+  bannedUsers: BannedUser[];
+  onBanUser: (name: string, reason: string) => void;
+  onUnbanUser: (id: number) => void;
 }
 
-const ForumHeader = ({ forumName, onNameChange, isAdmin, onToggleAdmin }: ForumHeaderProps) => {
+const ForumHeader = ({ forumName, onNameChange, isAdmin, onToggleAdmin, bannedUsers, onBanUser, onUnbanUser }: ForumHeaderProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(forumName);
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
 
   const handleSave = () => {
     if (editValue.trim()) {
@@ -60,7 +66,21 @@ const ForumHeader = ({ forumName, onNameChange, isAdmin, onToggleAdmin }: ForumH
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAdminPanelOpen(!adminPanelOpen)}
+                className="gap-1.5 border-[hsl(var(--forum-red))]/40 text-[hsl(var(--forum-red))] hover:bg-[hsl(var(--forum-red))]/10 relative"
+              >
+                <Icon name="ShieldAlert" size={16} />
+                Модерация
+                {bannedUsers.length > 0 && (
+                  <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4 ml-1">{bannedUsers.length}</Badge>
+                )}
+              </Button>
+            )}
             <Button
               variant={isAdmin ? "default" : "secondary"}
               size="sm"
@@ -73,6 +93,14 @@ const ForumHeader = ({ forumName, onNameChange, isAdmin, onToggleAdmin }: ForumH
           </div>
         </div>
       </div>
+
+      <AdminPanel
+        isOpen={adminPanelOpen}
+        onClose={() => setAdminPanelOpen(false)}
+        bannedUsers={bannedUsers}
+        onBanUser={onBanUser}
+        onUnbanUser={onUnbanUser}
+      />
     </header>
   );
 };

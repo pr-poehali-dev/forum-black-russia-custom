@@ -3,6 +3,7 @@ import ForumHeader from "@/components/ForumHeader";
 import ForumStats from "@/components/ForumStats";
 import ForumSection, { type Section } from "@/components/ForumSection";
 import TopicView from "@/components/TopicView";
+import type { BannedUser } from "@/components/AdminPanel";
 
 const INITIAL_SECTIONS: Section[] = [
   {
@@ -60,6 +61,18 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [sections, setSections] = useState<Section[]>(INITIAL_SECTIONS);
   const [selectedTopic, setSelectedTopic] = useState<{ sectionId: string; topicId: number } | null>(null);
+  const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
+
+  const handleBanUser = (name: string, reason: string) => {
+    setBannedUsers((prev) => [
+      ...prev,
+      { id: Date.now(), name, reason, date: new Date().toLocaleDateString("ru-RU") },
+    ]);
+  };
+
+  const handleUnbanUser = (id: number) => {
+    setBannedUsers((prev) => prev.filter((u) => u.id !== id));
+  };
 
   const updateTopic = (sectionId: string, topicId: number, updater: (t: Section["topics"][0]) => Section["topics"][0]) => {
     setSections((prev) =>
@@ -104,6 +117,9 @@ const Index = () => {
         onNameChange={setForumName}
         isAdmin={isAdmin}
         onToggleAdmin={() => setIsAdmin(!isAdmin)}
+        bannedUsers={bannedUsers}
+        onBanUser={handleBanUser}
+        onUnbanUser={handleUnbanUser}
       />
 
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-4">
